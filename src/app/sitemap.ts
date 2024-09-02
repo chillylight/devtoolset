@@ -9,22 +9,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
-        url: 'tools', // updatelog
+        url: 'tools', // tools
         lastModified: new Date(),
         changeFrequency: 'daily',
         priority: 0.9,
       },
     {
-      url: 'category', // blog
+      url: 'category', // category
       lastModified: new Date(),
       changeFrequency: 'daily',
-      priority: 0.8,
+      priority: 0.9,
     },
     {
-        url: 'posts', // faq
+        url: 'article', // article
         lastModified: new Date(),
         changeFrequency: 'daily',
         priority: 0.8,
+      },
+      {
+        url: 'changelog', // changelog
+        lastModified: new Date(),
+        changeFrequency: 'daily',
+        priority: 0.7,
       },
   ];
 

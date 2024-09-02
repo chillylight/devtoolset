@@ -1,6 +1,6 @@
 // components/ResourceList.tsx
 import React from 'react'; // 确保导入 React
-import Link from 'next/link'
+import { Link } from "@/lib/i18n";
 import { ExternalLink, ArrowRightIcon } from 'lucide-react'
 import {
   Card,
@@ -11,7 +11,9 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 
-import { getDataList, getCategories } from '@/lib/data';
+import { getDataList } from '@/lib/data';
+import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 
 // type toolProps = {
 //   name: string;
@@ -27,9 +29,14 @@ type categoryProps = {
   link: string
 }
 
+type categoryListProps = {
+  categories: categoryProps[]
+}
+
 
 type toolsListProps = {
   category: categoryProps,
+  locale: string,
   showMoreLink?: boolean
 }
 
@@ -44,24 +51,26 @@ type toolProps = {
 
 
 
-const ToolsList: React.FC<toolsListProps> = ({ category, showMoreLink = true }) => {
-  const srcList = getDataList(category.src)
 
+
+const ToolsList = ({ category, locale, showMoreLink = true }: toolsListProps) => {
+  const t = useTranslations('toolsList');
+  const srcList = getDataList(category.src, locale)
 
   return (
     <section>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold tracking-tight capitalize">{category.name}</h2>
         {showMoreLink && (
-          <Link href={`/tools/${category.link}`} className="capitalize text-blue-600 hover:text-blue-800 transition-colors hover:underline">
-            More {category.name} tools →
+          <Link href={`/category/${category.link}`} className="capitalize text-blue-600 hover:text-blue-800 transition-colors hover:underline">
+            {t('more')} <span className='capitalize font-bold'>{category.name}</span> {t('tools')} →
           </Link>
         )}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {/* @ts-ignore */}
         {srcList.slice(0,8).map((resource: toolProps, index) => (
-          <Card key={index} className='max-w-sm overflow-hidden shadow-md transform transition-transform duration-300 hover:scale-105'>
+          <Card key={index} className='max-w-sm overflow-hidden shadow-md transform transition-transform duration-300 hover:scale-105 '>
             <CardHeader>
               <a 
                 href={`${resource.url}?utm_source=devtoolset.net`} 
@@ -69,14 +78,16 @@ const ToolsList: React.FC<toolsListProps> = ({ category, showMoreLink = true }) 
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:text-blue-800 transition-colors inline-flex items-center gap-1"
               >
-                <div className='border border-gray-200 p-1 rounded-md mr-1'>
+                <div className='border border-gray-200 p-1 rounded-md mr-1 bg-white'>
+                  {/* <img width="20" height="20" src={`https://favicon.im/${resource.url}?larger=true`} alt={`${resource.name} favicon`} /> */}
                   { resource.icon_url ?
-                    <img width="20" height="20" src={resource.icon_url}  alt={`${resource.name} favicon`} />
+                    // <img width="20" height="20" src={resource.icon_url}  alt={`${resource.name} favicon`} />
+                    <Image width={20} height={20} src={resource.icon_url}  alt={`${resource.name} favicon`} loading='lazy'/>
                     :
-                    <img width="20" height="20" src={`https://favicon.im/${resource.url}`} alt={`${resource.name} favicon`} />
+                    <img width="20" height="20" src={`https://favicon.im/${resource.url}?larger=true`} alt={`${resource.name} favicon`} loading='lazy'/>
                   }
                 </div>
-                <CardTitle className='capitalize'>{resource.name}</CardTitle>
+                <CardTitle className='capitalize tracking-tighter'>{resource.name}</CardTitle>
                 <ExternalLink size={16} className='ml-1' />
               </a>
               <CardDescription className='flex flex-col justify-between '>
@@ -100,15 +111,11 @@ const ToolsList: React.FC<toolsListProps> = ({ category, showMoreLink = true }) 
   )
 }
 
-const ToolsPage: React.FC<toolsListProps> = ({ category }) => {
-  const srcList = getDataList(category.src)
+const ToolsPage = ({ category, locale }: { category: categoryProps, locale: string }) => {
+  const srcList = getDataList(category.src, locale);
 
   return (
     <section>
-      <div className="flex flex-col justify-between items-center mb-12">
-        <h1 className="text-3xl font-bold tracking-tight capitalize lg:text-5xl">{category.name}</h1>
-        <h2 className='text-sm mt-2 opacity-60 lg:text-lg'>All developer tools are sorted alphabetically</h2>
-      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
         {/* @ts-ignore */}
         {srcList.map((resource: toolProps, index) => (
@@ -120,14 +127,66 @@ const ToolsPage: React.FC<toolsListProps> = ({ category }) => {
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:text-blue-800 transition-colors inline-flex items-center gap-1"
               >
-                <div className='border border-gray-200 p-1 rounded-md mr-1'>
-                { resource.icon_url ?
-                    <img width="20" height="20" src={resource.icon_url}  alt={`${resource.name} favicon`} />
+                <div className='border border-gray-200 p-1 rounded-md mr-1 bg-white'>
+                  {/* <img width="20" height="20" src={`https://favicon.im/${resource.url}?larger=true`} alt={`${resource.name} favicon`} /> */}
+                  { resource.icon_url ?
+                    <Image width={20} height={20} src={resource.icon_url}  alt={`${resource.name} favicon`} loading='lazy'/>
                     :
-                    <img width="20" height="20" src={`https://favicon.im/${resource.url}`} alt={`${resource.name} favicon`} />
+                    <img width="20" height="20" src={`https://favicon.im/${resource.url}?larger=true`} alt={`${resource.name} favicon`} loading='lazy'/>
                   }
                 </div>
-                <CardTitle className='capitalize'>{resource.name}</CardTitle>
+                <CardTitle className='capitalize tracking-tighter'>{resource.name}</CardTitle>
+                <ExternalLink size={16} className='ml-1' />
+              </a>
+              <CardDescription className='flex flex-col justify-between '>
+                <div className='h-[60px] line-clamp-3 mt-1 tracking-tight text-start'>
+                  {resource.description}
+                </div>
+                { resource.tags ? 
+                  <div className='mt-3'>
+                  {resource.tags.slice(0,3).map((tag, i) => (
+                    <Badge key={i} variant="secondary" className='text-xs pb-1 mr-1 mt-2 tracking-tighter'>{tag}</Badge>
+                  ))}
+                </div> :
+                 null
+                }     
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+type searchPageProps = {
+  searchData: toolProps[]
+}
+
+const SearchPage = ({ searchData }: searchPageProps) => {
+
+  return (
+    <section>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
+        {/* @ts-ignore */}
+        {searchData.map((resource: toolProps, index) => (
+          <Card key={index} className='max-w-sm overflow-hidden shadow-md transform transition-transform duration-300 hover:scale-105'>
+            <CardHeader>
+              <a 
+                href={`${resource.url}?utm_source=devtoolset.net`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 transition-colors inline-flex items-center gap-1"
+              >
+                <div className='border border-gray-200 p-1 rounded-md mr-1 bg-white'>
+                  {/* <img width="20" height="20" src={`https://favicon.im/${resource.url}?larger=true`} alt={`${resource.name} favicon`} /> */}
+                  { resource.icon_url ?
+                    <Image width={20} height={20} src={resource.icon_url}  alt={`${resource.name} favicon`} loading='lazy'/>
+                    :
+                    <img width="20" height="20" src={`https://favicon.im/${resource.url}?larger=true`} alt={`${resource.name} favicon`} loading='lazy'/>
+                  }
+                </div>
+                <CardTitle className='capitalize tracking-tighter'>{resource.name}</CardTitle>
                 <ExternalLink size={16} className='ml-1' />
               </a>
               <CardDescription className='flex flex-col justify-between '>
@@ -152,19 +211,17 @@ const ToolsPage: React.FC<toolsListProps> = ({ category }) => {
 }
 
 
-const CategoryList = () => {
-  const srcList = getCategories()
-
+const CategoryList = ({ categories }: categoryListProps) => {
 
   return (
     <section>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
         {/* @ts-ignore */}
-        {srcList.map((category: categoryProps, index) => (
+        {categories.map((category: categoryProps, index) => (
           <Card key={index} className='max-w-sm overflow-hidden shadow-md transform transition-transform duration-300 hover:scale-105'>
             <CardHeader>
               <a 
-                href={`/tools/${category.link}`}
+                href={`/category/${category.link}`}
                 className="text-blue-600 hover:text-blue-800 transition-colors inline-flex items-center gap-1"
               >
                 <CardTitle className='capitalize'>{category.name}</CardTitle>
@@ -183,4 +240,4 @@ const CategoryList = () => {
   )
 }
 
-export { ToolsList, ToolsPage, CategoryList };
+export { ToolsList, ToolsPage, CategoryList, SearchPage };
